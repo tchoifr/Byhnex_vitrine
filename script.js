@@ -1,96 +1,124 @@
-// Chiffres animés
+// Chiffres animes
 function animateCounter(el) {
-    const target = +el.getAttribute("data-target");
-    let count = 0;
+  const target = Number(el.getAttribute("data-target"));
+  let count = 0;
 
-    const update = () => {
-        count += Math.ceil(target / 500); // durée ~1s
-        if(count < target) {
-            el.textContent = count.toLocaleString() + "+";
-            requestAnimationFrame(update);
-        } else {
-            el.textContent = target.toLocaleString() + "+";
-        }
-    };
+  const update = () => {
+    count += Math.ceil(target / 500); // duree ~1s
+    if (count < target) {
+      el.textContent = count.toLocaleString() + "+";
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = target.toLocaleString() + "+";
+    }
+  };
 
-    update();
+  update();
 }
 
+// Démarre les compteurs uniquement quand la section stats entre en vue
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".stat-number").forEach(num => animateCounter(num));
+  const statNumbers = document.querySelectorAll(".stat-number");
+  if (!statNumbers.length) return;
+
+  let started = false;
+  const startCounters = () => {
+    if (started) return;
+    started = true;
+    statNumbers.forEach((num) => animateCounter(num));
+  };
+
+  const statsSection = document.querySelector(".stats-section");
+  if (!("IntersectionObserver" in window) || !statsSection) {
+    startCounters();
+    return;
+  }
+
+  const statsObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          startCounters();
+          observer.disconnect();
+        }
+      });
+    },
+    { threshold: 0.35 }
+  );
+
+  statsObserver.observe(statsSection);
 });
 
 // Loader full-screen
 window.addEventListener("load", () => {
-    const loader = document.getElementById("loader");
-    if (!loader) return;
-    const MIN_DELAY = 1000;
-    const elapsed = performance.now();
-    const delay = Math.max(MIN_DELAY - elapsed, 0);
+  const loader = document.getElementById("loader");
+  if (!loader) return;
+  const MIN_DELAY = 1000;
+  const elapsed = performance.now();
+  const delay = Math.max(MIN_DELAY - elapsed, 0);
 
-    setTimeout(() => {
-        loader.classList.add("loader--hide");
-        setTimeout(() => loader.remove(), 700);
-    }, delay);
+  setTimeout(() => {
+    loader.classList.add("loader--hide");
+    setTimeout(() => loader.remove(), 700);
+  }, delay);
 });
 
 // Animation sections depuis le bas
 document.addEventListener("DOMContentLoaded", () => {
-    const sections = document.querySelectorAll("section");
-    if (!sections.length) return;
+  const sections = document.querySelectorAll("section");
+  if (!sections.length) return;
 
-    const sectionObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("section-visible");
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.18, rootMargin: "0px 0px -10% 0px" });
+  const sectionObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("section-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.18, rootMargin: "0px 0px -10% 0px" }
+  );
 
-    sections.forEach((section) => {
-        section.classList.add("section-scroll");
-        sectionObserver.observe(section);
-    });
+  sections.forEach((section) => {
+    section.classList.add("section-scroll");
+    sectionObserver.observe(section);
+  });
 });
 
 // ===============================
 // Roadmap Reveal Animation
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
-    
-    const items = document.querySelectorAll(".timeline-item");
-    const cards = document.querySelectorAll(".roadmap-card");
+  const items = document.querySelectorAll(".timeline-item");
+  const cards = document.querySelectorAll(".roadmap-card");
 
-    function triggerAnimation() {
-        const triggerPoint = window.innerHeight * 0.85;
+  function triggerAnimation() {
+    const triggerPoint = window.innerHeight * 0.85;
 
-        items.forEach((item, index) => {
-            const rect = item.getBoundingClientRect();
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
 
-            // élément atteint le point de déclenchement
-            if (rect.top < triggerPoint) {
-                
-                // Active l'item timeline
-                item.classList.add("fade-up");
-                item.classList.add("active");
+      // Elément atteint le point de déclenchement
+      if (rect.top < triggerPoint) {
+        // Active l'item timeline
+        item.classList.add("fade-up");
+        item.classList.add("active");
 
-                // Active la carte correspondante
-                if (cards[index]) {
-                    cards[index].classList.add("fade-up");
-                }
-            }
-        });
-    }
+        // Active la carte correspondante
+        if (cards[index]) {
+          cards[index].classList.add("fade-up");
+        }
+      }
+    });
+  }
 
-    // Déclenche lors du scroll
-    window.addEventListener("scroll", triggerAnimation);
+  // Déclenche lors du scroll
+  window.addEventListener("scroll", triggerAnimation);
 
-    // Déclenche au chargement pour les éléments déjà visibles
-    triggerAnimation();
+  // Déclenche au chargement pour les éléments déjà visibles
+  triggerAnimation();
 });
-
-
 
 // ===============================
 // Intersection Observer pour les reveals
@@ -98,18 +126,19 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const reveals = document.querySelectorAll(".reveal");
 
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-      }
-    });
-  }, { threshold: 0.15 });
+  const obs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
 
   reveals.forEach((el) => obs.observe(el));
 });
-
-
 
 // === Popup Logic (multiple buttons allowed) ===
 const joinDaoButtons = document.querySelectorAll(".joinDaoBtn");
